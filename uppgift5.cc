@@ -7,7 +7,13 @@ class Inventory_Space
 public:
   Inventory_Space(int* n);
   Inventory_Space();
-  ~Inventory_Space() = default;
+  ~Inventory_Space();
+
+  Inventory_Space(Inventory_Space const& other);
+  Inventory_Space& operator=(Inventory_Space const& other) = delete;
+
+  Inventory_Space(Inventory_Space && other);
+  Inventory_Space& operator=(Inventory_Space && other) = delete;
   
   void print() const;
   void merge(Inventory_Space& space);
@@ -29,6 +35,24 @@ Inventory_Space::Inventory_Space()
   
 }
 
+Inventory_Space::~Inventory_Space()
+{
+  delete number;
+  number = nullptr;
+}
+
+Inventory_Space::Inventory_Space(Inventory_Space const& other)
+  :number{new int {*other.number}}
+{
+  
+}
+
+Inventory_Space::Inventory_Space(Inventory_Space && other)
+  :number{other.number}
+{
+  other.number = nullptr;
+}
+
 void Inventory_Space::print() const
 {
   if(number != nullptr)
@@ -43,23 +67,24 @@ void Inventory_Space::print() const
 
 void Inventory_Space::merge(Inventory_Space& space)
 {
-  int* ptr_space = space.number;
-  int space_int = *ptr_space;
-  
+
   if(*this == space)
     {
       return;
     }
-      
+  
   if(number == nullptr)
     {
-      *number = space_int;
+      number = space.number;
+      space.number = nullptr;
+      return;
     }
+  
 
-  if(*number == space_int)
+  if(space.number != nullptr and *number == *space.number)
     {
       (*number)++;
-
+      delete space.number;
       space.number = nullptr;
     }
 }
@@ -78,11 +103,11 @@ bool Inventory_Space::operator==(Inventory_Space& rhs)
   
 int main()
 {
-  std::vector<Inventory_Space> v {};
-
+  std::vector<Inventory_Space> v {}; 
   // Create 8 spaces
   for ( unsigned int i{}; i < 8; ++i )
   {
+    
     v.push_back(Inventory_Space{new int{1}});
   }
 
